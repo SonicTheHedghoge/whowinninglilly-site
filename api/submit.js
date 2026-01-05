@@ -1,32 +1,6 @@
 const { Redis } = require('@upstash/redis');
 const { Resend } = require('resend');
 
-let redis, resend;
-
-// Initialize clients only when needed to avoid cold start issues
-function initializeClients() {
-  if (!redis) {
-    try {
-      redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      });
-    } catch (error) {
-      console.error('Redis initialization error:', error);
-      throw new Error('Failed to initialize Redis');
-    }
-  }
-  
-  if (!resend) {
-    try {
-      resend = new Resend(process.env.RESEND_API_KEY);
-    } catch (error) {
-      console.error('Resend initialization error:', error);
-      throw new Error('Failed to initialize Resend');
-    }
-  }
-}
-
 // Video URLs
 const WINNING_VIDEO = 'https://www.youtube.com/watch?v=7Gw57AxsgMY';
 const SAFE_VIDEOS = [
@@ -42,7 +16,34 @@ const SAFE_VIDEOS = [
   'https://www.youtube.com/watch?v=UV0mhY2Dxr0'
 ];
 
-export default async function handler(req, res) {
+// Initialize clients (will be initialized on first request)
+let redis = null;
+let resend = null;
+
+function initializeClients() {
+  if (!redis) {
+    try {
+      redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      });
+    } catch (error) {
+      console.error('Redis initialization error:', error);
+      throw new Error('Failed to initialize Redis connection');
+    }
+  }
+  
+  if (!resend) {
+    try {
+      resend = new Resend(process.env.RESEND_API_KEY);
+    } catch (error) {
+      console.error('Resend initialization error:', error);
+      throw new Error('Failed to initialize email service');
+    }
+  }
+}
+
+module.exports = async (req, res) => {
   // Enable CORS for all origins
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -57,10 +58,11 @@ export default async function handler(req, res) {
 
   // Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({
+    res.status(405).json({
       success: false,
       message: 'Method not allowed'
     });
+    return;
   }
 
   try {
@@ -71,10 +73,11 @@ export default async function handler(req, res) {
 
     // Validate email
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'Please provide a valid email address'
       });
+      return;
     }
 
     // Check if email already participated
@@ -83,17 +86,19 @@ export default async function handler(req, res) {
       existingEntry = await redis.get(`participant:${email}`);
     } catch (redisError) {
       console.error('Redis get error:', redisError);
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         message: 'Database error. Please try again.'
       });
+      return;
     }
     
     if (existingEntry) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'You have already participated in this contest.'
       });
+      return;
     }
 
     // Determine if winner (0.01% chance)
@@ -118,10 +123,11 @@ export default async function handler(req, res) {
       );
     } catch (redisError) {
       console.error('Redis set error:', redisError);
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         message: 'Failed to save your entry. Please try again.'
       });
+      return;
     }
 
     // Update stats
@@ -163,7 +169,7 @@ One entry per person. Good luck!
     }
 
     // Return success response
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: 'Your entry has been submitted! Check your email for your mystery video.',
       isWinner
@@ -171,9 +177,9 @@ One entry per person. Good luck!
 
   } catch (error) {
     console.error('Submission handler error:', error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: 'An unexpected error occurred. Please try again later.'
     });
   }
-}
+};
