@@ -1,8 +1,8 @@
 const { Redis } = require('@upstash/redis');
 
-let redis;
+// Initialize Redis client (will be initialized on first request)
+let redis = null;
 
-// Initialize Redis client only when needed
 function initializeRedis() {
   if (!redis) {
     try {
@@ -12,12 +12,12 @@ function initializeRedis() {
       });
     } catch (error) {
       console.error('Redis initialization error:', error);
-      throw new Error('Failed to initialize Redis');
+      throw new Error('Failed to initialize Redis connection');
     }
   }
 }
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   // Enable CORS for all origins
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -32,9 +32,10 @@ export default async function handler(req, res) {
 
   // Only allow GET requests
   if (req.method !== 'GET') {
-    return res.status(405).json({
+    res.status(405).json({
       error: 'Method not allowed'
     });
+    return;
   }
 
   try {
@@ -68,7 +69,7 @@ export default async function handler(req, res) {
     // Calculate remaining prizes (assuming 10 total prizes)
     const prizesRemaining = Math.max(0, 10 - parseInt(totalWinners || 0));
 
-    return res.status(200).json({
+    res.status(200).json({
       totalAttempts: parseInt(totalAttempts || 0),
       attemptsToday: parseInt(attemptsToday || 0),
       winners: parseInt(totalWinners || 0),
@@ -77,8 +78,8 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Stats handler error:', error);
-    return res.status(500).json({
+    res.status(500).json({
       error: 'Failed to fetch stats'
     });
   }
-}
+};
