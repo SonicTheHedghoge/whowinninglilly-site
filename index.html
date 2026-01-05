@@ -892,6 +892,10 @@
     </div>
 
     <script>
+        // Track if stats are currently updating to prevent multiple simultaneous requests
+        let isUpdatingStats = false;
+        let statsUpdateInterval = null;
+
         // Form submission handling
         document.getElementById('participation-form').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -937,6 +941,7 @@
                     formSuccess.style.display = 'block';
                     
                     showNotification(data.message);
+                    // Update stats after successful submission
                     updateStats();
                 } else {
                     showNotification(data.message, 'error');
@@ -971,8 +976,15 @@
             }, 5000);
         }
         
-        // Update stats with animation
+        // Update stats with animation - prevent multiple simultaneous calls
         function updateStats() {
+            // If already updating, skip this call
+            if (isUpdatingStats) {
+                return;
+            }
+            
+            isUpdatingStats = true;
+            
             fetch('/api/stats')
                 .then(response => {
                     if (!response.ok) {
@@ -981,35 +993,18 @@
                     return response.json();
                 })
                 .then(data => {
-                    animateValue(document.getElementById('total-attempts'), 
-                                parseInt(document.getElementById('total-attempts').textContent.replace(/,/g, '')), 
-                                data.totalAttempts, 1000);
-                    animateValue(document.getElementById('attempts-today'), 
-                                parseInt(document.getElementById('attempts-today').textContent.replace(/,/g, '')), 
-                                data.attemptsToday, 1000);
-                    animateValue(document.getElementById('winners'), 
-                                parseInt(document.getElementById('winners').textContent), 
-                                data.winners, 1000);
-                    document.getElementById('prizes-remaining').textContent = data.prizesRemaining;
+                    // Update stats without animation to prevent the counting issue
+                    document.getElementById('total-attempts').textContent = (data.totalAttempts || 0).toLocaleString();
+                    document.getElementById('attempts-today').textContent = (data.attemptsToday || 0).toLocaleString();
+                    document.getElementById('winners').textContent = data.winners || 0;
+                    document.getElementById('prizes-remaining').textContent = data.prizesRemaining || 0;
                 })
                 .catch(error => {
                     console.error('Error fetching stats:', error);
+                })
+                .finally(() => {
+                    isUpdatingStats = false;
                 });
-        }
-        
-        // Animate counter values
-        function animateValue(element, start, end, duration) {
-            const range = end - start;
-            let current = start;
-            const increment = end > start ? 1 : -1;
-            const stepTime = Math.abs(Math.floor(duration / range));
-            const timer = setInterval(() => {
-                current += increment;
-                element.textContent = current.toLocaleString();
-                if (current === end) {
-                    clearInterval(timer);
-                }
-            }, stepTime);
         }
         
         // Initialize animations on scroll
@@ -1035,8 +1030,22 @@
             // Fetch initial stats
             updateStats();
             
-            // Update stats every 30 seconds
-            setInterval(updateStats, 30000);
+            // Update stats every 30 seconds, but only if not already updating
+            if (statsUpdateInterval) {
+                clearInterval(statsUpdateInterval);
+            }
+            statsUpdateInterval = setInterval(() => {
+                if (!isUpdatingStats) {
+                    updateStats();
+                }
+            }, 30000);
+        });
+        
+        // Clean up interval when page is unloaded
+        window.addEventListener('beforeunload', () => {
+            if (statsUpdateInterval) {
+                clearInterval(statsUpdateInterval);
+            }
         });
     </script>
 </body>
