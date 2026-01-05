@@ -11,7 +11,7 @@ const redis = new Redis({
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Video URLs
-const WINNING_VIDEO = 'https://www.youtube.com/watch?v=7Gw57AxsgMY';  // Perfect 8K Red Spider Lily blooming timelapse
+const WINNING_VIDEO = 'https://www.youtube.com/watch?v=7Gw57AxsgMY';
 const SAFE_VIDEOS = [
   'https://www.youtube.com/watch?v=RzVvThhjAKw',
   'https://www.youtube.com/watch?v=AKeUssuu3Is',
@@ -26,11 +26,21 @@ const SAFE_VIDEOS = [
 ];
 
 export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   // Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ 
-      success: false, 
-      message: 'Method not allowed' 
+    return res.status(405).json({
+      success: false,
+      message: 'Method not allowed'
     });
   }
 
@@ -38,9 +48,9 @@ export default async function handler(req, res) {
 
   // Validate email
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'Please provide a valid email address' 
+    return res.status(400).json({
+      success: false,
+      message: 'Please provide a valid email address'
     });
   }
 
@@ -48,23 +58,23 @@ export default async function handler(req, res) {
     // Check if email already participated
     const existingEntry = await redis.get(`participant:${email}`);
     if (existingEntry) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'You have already participated in this contest.' 
+      return res.status(400).json({
+        success: false,
+        message: 'You have already participated in this contest.'
       });
     }
 
     // Determine if winner (0.01% chance)
     const isWinner = Math.random() < 0.0001;
-    
+
     // Select video
-    const videoLink = isWinner 
-      ? WINNING_VIDEO 
+    const videoLink = isWinner
+      ? WINNING_VIDEO
       : SAFE_VIDEOS[Math.floor(Math.random() * SAFE_VIDEOS.length)];
 
     // Store participant data
     await redis.set(
-      `participant:${email}`, 
+      `participant:${email}`,
       JSON.stringify({
         email,
         isWinner,
@@ -88,15 +98,15 @@ Thank you for participating! Here is your mystery video:
 
 ${videoLink}
 
-${isWinner 
-  ? 'Congratulations! You received The Red Spider Lily and are a WINNER! DM @WhoWinningLilly on Instagram immediately to claim your prize.' 
+${isWinner
+  ? 'Congratulations! You received The Red Spider Lily and are a WINNER! DM @WhoWinningLilly on Instagram immediately to claim your prize.'
   : 'If you received The Red Spider Lily, you are a winner! DM @WhoWinningLilly on Instagram immediately to claim your prize.'}
 
 One entry per person. Good luck!
-    `;
+`;
 
     await resend.emails.send({
-     from: 'WhoWinningLilly <onboarding@resend.dev>',
+      from: 'WhoWinningLilly <onboarding@resend.dev>',
       to: email,
       subject: 'Your WhoWinningLilly Fate Revealed',
       text: emailContent,
@@ -111,9 +121,9 @@ One entry per person. Good luck!
 
   } catch (error) {
     console.error('Submission error:', error);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'An error occurred while processing your submission. Please try again.' 
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while processing your submission. Please try again.'
     });
   }
 }
