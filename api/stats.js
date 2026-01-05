@@ -7,10 +7,22 @@ const redis = new Redis({
 });
 
 export default async function handler(req, res) {
+  // Enable CORS for all origins
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   try {
     // Get today's date for daily stats
     const today = new Date().toISOString().split('T')[0];
-    
+
     // Fetch stats from Redis
     const [
       totalAttempts,
@@ -23,19 +35,19 @@ export default async function handler(req, res) {
     ]);
 
     // Calculate remaining prizes (assuming 10 total prizes)
-    const prizesRemaining = Math.max(0, 10 - parseInt(totalWinners));
+    const prizesRemaining = Math.max(0, 10 - parseInt(totalWinners || 0));
 
     return res.status(200).json({
-      totalAttempts: parseInt(totalAttempts),
-      attemptsToday: parseInt(attemptsToday),
-      winners: parseInt(totalWinners),
+      totalAttempts: parseInt(totalAttempts || 0),
+      attemptsToday: parseInt(attemptsToday || 0),
+      winners: parseInt(totalWinners || 0),
       prizesRemaining
     });
 
   } catch (error) {
     console.error('Stats error:', error);
-    return res.status(500).json({ 
-      error: 'Failed to fetch stats' 
+    return res.status(500).json({
+      error: 'Failed to fetch stats'
     });
   }
 }
