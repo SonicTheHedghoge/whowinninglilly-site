@@ -30,8 +30,6 @@
         }
 
         body {
-            <audio id="welcomeVoice" src="audio/welcome.wav" preload="auto"></audio>
-
             font-family: 'Montserrat', sans-serif;
             background: linear-gradient(135deg, var(--dark-bg) 0%, #120225 100%);
             color: var(--silver);
@@ -230,6 +228,36 @@
             background: rgba(255, 215, 0, 0.1);
             border-radius: 30px;
             border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        /* Welcome Voice Button */
+        .voice-btn {
+            background: linear-gradient(45deg, var(--gold), #daa520);
+            color: #0a0a0f;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 20px rgba(218, 165, 32, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .voice-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(218, 165, 32, 0.6);
+        }
+
+        .voice-btn i {
+            margin-right: 10px;
+            font-size: 1.3rem;
         }
 
         /* How It Works */
@@ -693,6 +721,9 @@
     </style>
 </head>
 <body>
+    <!-- Audio element for welcome voice -->
+    <audio id="welcomeVoice" src="audio/welcome.wav" preload="auto"></audio>
+
     <!-- Header -->
     <header>
         <div class="container header-content">
@@ -713,13 +744,19 @@
         <div class="container hero-content">
             <h1 class="animate">Will You Be Chosen?</h1>
             <p class="animate delay-1">One attempt. One email. One impossible chance.</p>
+            
+            <!-- Welcome Voice Button -->
+            <button id="voiceButton" class="voice-btn animate delay-2">
+                <i class="fas fa-volume-up"></i> Play Welcome Voice
+            </button>
+            
             <div>
-                <a href="#participate" class="hero-btn animate delay-2">Try Your Chance</a>
-                <a href="https://instagram.com/WhoWinningLilly" target="_blank" class="hero-btn animate delay-2">
+                <a href="#participate" class="hero-btn animate delay-3">Try Your Chance</a>
+                <a href="https://instagram.com/WhoWinningLilly" target="_blank" class="hero-btn animate delay-3">
                     <i class="fab fa-instagram"></i> Follow Us
                 </a>
             </div>
-            <div class="odds animate delay-3">Odds: 0.01%</div>
+            <div class="odds animate delay-4">Odds: 0.01%</div>
         </div>
     </section>
 
@@ -899,6 +936,23 @@
     </div>
 
     <script>
+        // Welcome voice functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const welcomeVoice = document.getElementById('welcomeVoice');
+            const voiceButton = document.getElementById('voiceButton');
+            
+            // Play welcome voice when button is clicked
+            voiceButton.addEventListener('click', function() {
+                welcomeVoice.play().catch(e => {
+                    console.error("Audio play failed:", e);
+                    showNotification('Failed to play welcome voice. Please check your audio settings.', 'error');
+                });
+            });
+            
+            // Optional: Play welcome voice automatically on page load
+            // welcomeVoice.play().catch(e => console.error("Auto-play failed:", e));
+        });
+
         // Track if stats are currently updating to prevent multiple simultaneous requests
         let isUpdatingStats = false;
         let statsUpdateInterval = null;
