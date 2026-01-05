@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhoWinningLilly | Luxury Mystery Contest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --dark-bg: #0a0a0f;
+            --dark-card: rgba(15, 15, 25, 0.7);
+            --violet: #6a0dad;
+            --violet-light: #8a2be2;
+            --silver: #c0c0c0;
+            --silver-light: #e0e0e0;
+            --gold: #ffd700;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #120225 100%);
+            color: var(--silver);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(106, 13, 173, 0.1) 0%, transparent 20%),
+                        radial-gradient(circle at 90% 80%, rgba(138, 43, 226, 0.1) 0%, transparent 20%);
+            z-index: -1;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            color: var(--silver-light);
+            font-weight: 700;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .glass-card {
+            background: rgba(25, 25, 45, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            transition: var(--transition);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(138, 43, 226, 0.2);
+        }
+
+        /* Header & Navigation */
+        header {
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(to right, var(--silver-light), var(--gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 30px;
+        }
+
+        nav ul li a {
+            color: var(--silver);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        nav ul li a:hover {
+            color: var(--gold);
+        }
+
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold);
+            transition: var(--transition);
+        }
+
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 80px;
+        }
+
+        .hero-content {
+            max-width: 700px;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            background: linear-gradient(to bottom, var(--silver-light), var(--gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            max-width: 600px;
+            opacity: 0.9;
+        }
+
+        .hero-btn {
+            background: linear-gradient(45deg, var(--violet), var(--violet-light));
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 10px 25px rgba(106, 13, 173, 0.4);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .hero-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+
+        .hero-btn:hover::before {
+            left: 100%;
+        }
+
+        .hero-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(138, 43, 226, 0.6);
+        }
+
+        .odds {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 8px 20px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        /* How It Works */
+        .section {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.8;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .step {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .step-number {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(45deg, var(--violet), var(--violet-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 auto 25px;
+            box-shadow: 0 5px 15px rgba(106, 13, 173, 0.4);
+        }
+
+        .step h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        /* Form Section */
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 18px 25px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: var(--silver-light);
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--violet-light);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.3);
+        }
+
+        .trust-text {
+            text-align: center;
+            font-size: 0.95rem;
+            opacity: 0.8;
+            margin: 20px 0;
+        }
+
+        .trust-text span {
+            margin: 0 10px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(45deg, var(--gold), #daa520);
+            color: #0a0a0f;
+            border: none;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 20px rgba(218, 165, 32, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(218, 165, 32, 0.6);
+        }
+
+        .submit-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Prizes Section */
+        .prizes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .prize-card {
+            text-align: center;
+            padding: 40px 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prize-card.locked {
+            opacity: 0.6;
+            filter: grayscale(100%);
+        }
+
+        .prize-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: var(--gold);
+        }
+
+        .prize-card.locked .prize-icon {
+            color: #555;
+        }
+
+        .prize-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .prize-desc {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        .unlock-condition {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--gold);
+            color: #0a0a0f;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--gold), var(--silver-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(5, 5, 15, 0.9);
+            padding: 50px 0 30px;
+            border-top: 1px solid rgba(138, 43, 226, 0.2);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(to right, var(--silver-light), var(--gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--silver);
+            font-size: 1.2rem;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            background: var(--violet);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .footer-links h4 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-links h4::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--gold);
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links ul li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links ul li a {
+            color: var(--silver);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links ul li a:hover {
+            color: var(--gold);
+            padding-left: 5px;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+            }
+
+            nav ul {
+                margin-top: 20px;
+            }
+
+            nav ul li {
+                margin: 0 10px;
+            }
+
+            .hero {
+                text-align: center;
+            }
+
+            .hero-content {
+                margin: 0 auto;
+            }
+
+            .hero p {
+                margin: 0 auto 30px;
+            }
+
+            .section {
+                padding: 70px 0;
+            }
+
+            .section-title h2 {
+                font-size: 2.3rem;
+            }
+            
+            .hero-btn {
+                margin: 10px 5px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            .step {
+                min-width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px 30px;
+            background: rgba(25, 25, 45, 0.9);
+            border-left: 4px solid var(--gold);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(120%);
+            transition: transform 0.4s ease;
+            z-index: 2000;
+            max-width: 400px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            border-left-color: #ff4d4d;
+        }
+        
+        .instagram-link {
+            color: #E1306C;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .instagram-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">WhoWinningLilly</div>
+            <nav>
+                <ul>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#prizes">Prizes</a></li>
+                    <li><a href="#stats">Stats</a></li>
+                    <li><a href="#participate">Participate</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h1 class="animate">Will You Be Chosen?</h1>
+            <p class="animate delay-1">One attempt. One email. One impossible chance.</p>
+            <div>
+                <a href="#participate" class="hero-btn animate delay-2">Try Your Chance</a>
+                <a href="https://instagram.com/WhoWinningLilly" target="_blank" class="hero-btn animate delay-2">
+                    <i class="fab fa-instagram"></i> Follow Us
+                </a>
+            </div>
+            <div class="odds animate delay-3">Odds: 0.01%</div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section" id="how-it-works">
+        <div class="container">
+            <div class="section-title">
+                <h2>How It Works</h2>
+                <p>Simple steps to participate in the luxury mystery contest</p>
+            </div>
+            <div class="steps">
+                <div class="step glass-card animate">
+                    <div class="step-number">1</div>
+                    <h3>Enter Your Email</h3>
+                    <p>Submit your email address once only to participate in the contest.</p>
+                </div>
+                <div class="step glass-card animate delay-1">
+                    <div class="step-number">2</div>
+                    <h3>Receive Video</h3>
+                    <p>Get a randomly selected video delivered to your inbox immediately.</p>
+                </div>
+                <div class="step glass-card animate delay-2">
+                    <div class="step-number">3</div>
+                    <h3>Win Prizes</h3>
+                    <p>If you receive The Lily, DM us on Instagram to claim your prize.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Participation Form -->
+    <section class="section" id="participate">
+        <div class="container">
+            <div class="section-title">
+                <h2>Participate Now</h2>
+                <p>Enter your email for a chance to win exclusive prizes</p>
+            </div>
+            <div class="form-container glass-card">
+                <form id="participation-form" action="/api/submit" method="POST">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="your.email@example.com" required>
+                    </div>
+                    <div class="trust-text">
+                        <span><i class="fas fa-lock"></i> No spam</span>
+                        <span><i class="fas fa-user"></i> One attempt per person</span>
+                        <span><i class="fas fa-envelope"></i> We never sell emails</span>
+                    </div>
+                    <button type="submit" class="submit-btn">Reveal My Fate</button>
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Processing your entry...</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prizes Section -->
+    <section class="section" id="prizes">
+        <div class="container">
+            <div class="section-title">
+                <h2>Prize Ladder</h2>
+                <p>Exclusive rewards for lucky winners</p>
+            </div>
+            <div class="prizes-grid">
+                <div class="prize-card glass-card">
+                    <div class="badge">Unlocked</div>
+                    <div class="prize-icon"><i class="fas fa-trophy"></i></div>
+                    <h3 class="prize-title">Prize I</h3>
+                    <p class="prize-desc">Badge + Personal Website</p>
+                </div>
+                <div class="prize-card glass-card locked">
+                    <div class="prize-icon"><i class="fas fa-gift"></i></div>
+                    <h3 class="prize-title">Prize II</h3>
+                    <p class="prize-desc">$100 Gift Card</p>
+                    <p class="unlock-condition">Unlocks at 10,000 Instagram followers</p>
+                </div>
+                <div class="prize-card glass-card locked">
+                    <div class="prize-icon"><i class="fas fa-star"></i></div>
+                    <h3 class="prize-title">Prize III</h3>
+                    <p class="prize-desc">Sponsored Instagram Account</p>
+                    <p class="unlock-condition">Unlocks at 50,000 Instagram followers</p>
+                </div>
+                <div class="prize-card glass-card locked">
+                    <div class="prize-icon"><i class="fas fa-crown"></i></div>
+                    <h3 class="prize-title">Final Prize</h3>
+                    <p class="prize-desc">Classified</p>
+                    <p class="unlock-condition">Revealed at a historic milestone</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="section" id="stats">
+        <div class="container">
+            <div class="section-title">
+                <h2>Live Stats</h2>
+                <p>Real-time contest participation metrics</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card glass-card">
+                    <div class="stat-value" id="attempts-today">0</div>
+                    <div class="stat-label">Attempts Today</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-value" id="total-attempts">0</div>
+                    <div class="stat-label">Total Attempts</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-value" id="winners">0</div>
+                    <div class="stat-label">Winners Selected</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-value" id="prizes-remaining">10</div>
+                    <div class="stat-label">Prizes Remaining</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">WhoWinningLilly</div>
+                    <p>Premium mystery contest with exclusive prizes for lucky winners.</p>
+                    <div class="social-links">
+                        <a href="https://instagram.com/WhoWinningLilly" target="_blank">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://twitter.com/WhoWinningLilly" target="_blank">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://tiktok.com/@WhoWinningLilly" target="_blank">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#prizes">Prizes</a></li>
+                        <li><a href="#stats">Live Stats</a></li>
+                        <li><a href="#participate">Participate</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Rules & Regulations</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2025 WhoWinningLilly. All rights reserved. Chance of winning: 0.01% | 
+                <a href="https://instagram.com/WhoWinningLilly" class="instagram-link" target="_blank">
+                    <i class="fab fa-instagram"></i> @WhoWinningLilly
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <p id="notification-message"></p>
+    </div>
+
+    <script>
+        // Form submission handling
+        document.getElementById('participation-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const loading = document.getElementById('loading');
+            const submitBtn = document.querySelector('.submit-btn');
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showNotification('Please enter a valid email address.', 'error');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            // Submit form via fetch
+            const formData = new FormData(this);
+            
+            fetch('/api/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                
+                if (data.success) {
+                    // Show success notification
+                    showNotification(data.message);
+                    
+                    // Reset form
+                    document.getElementById('participation-form').reset();
+                    
+                    // Update stats
+                    updateStats();
+                } else {
+                    // Show error
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                // Hide loading
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                
+                // Show error
+                showNotification('An error occurred. Please try again.', 'error');
+                console.error('Error:', error);
+            });
+        });
+        
+        // Notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notification-message');
+            
+            messageEl.textContent = message;
+            notification.className = 'notification ' + (type === 'error' ? 'error' : '');
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Update stats with animation
+        function updateStats() {
+            // In a real implementation, this would fetch from the API
+            // For now, we'll simulate updates
+            const attemptsElement = document.getElementById('total-attempts');
+            const current = parseInt(attemptsElement.textContent.replace(/,/g, ''));
+            const newValue = current + 1;
+            
+            // Animate the counter
+            animateValue(attemptsElement, current, newValue, 1000);
+            
+            // Update today's attempts
+            const todayElement = document.getElementById('attempts-today');
+            const todayCurrent = parseInt(todayElement.textContent.replace(/,/g, ''));
+            animateValue(todayElement, todayCurrent, todayCurrent + 1, 1000);
+        }
+        
+        // Animate counter values
+        function animateValue(element, start, end, duration) {
+            const range = end - start;
+            let current = start;
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            const timer = setInterval(() => {
+                current += increment;
+                element.textContent = current.toLocaleString();
+                if (current === end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+        
+        // Initialize animations on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const animateElements = document.querySelectorAll('.animate');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            animateElements.forEach(element => {
+                element.style.opacity = 0;
+                element.style.transform = 'translateY(20px)';
+                element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(element);
+            });
+            
+            // Fetch initial stats
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-attempts').textContent = data.totalAttempts.toLocaleString();
+                    document.getElementById('attempts-today').textContent = data.attemptsToday.toLocaleString();
+                    document.getElementById('winners').textContent = data.winners;
+                    document.getElementById('prizes-remaining').textContent = data.prizesRemaining;
+                })
+                .catch(error => console.error('Error fetching stats:', error));
+        });
+    </script>
+</body>
+</html>

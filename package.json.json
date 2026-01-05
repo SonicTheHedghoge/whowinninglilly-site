@@ -1,0 +1,12 @@
+{
+  "name": "whowinninglilly",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "vercel-build": ""
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.28.0",
+    "resend": "^3.2.0"
+  }
+}
