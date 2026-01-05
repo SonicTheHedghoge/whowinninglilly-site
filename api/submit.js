@@ -21,25 +21,54 @@ let redis = null;
 let resend = null;
 
 function initializeClients() {
-  if (!redis) {
-    try {
-      redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      });
-    } catch (error) {
-      console.error('Redis initialization error:', error);
-      throw new Error('Failed to initialize Redis connection');
-    }
+  // Check if already initialized
+  if (redis && resend) {
+    return;
+  }
+
+  // Get and clean environment variables
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL 
+    ? process.env.UPSTASH_REDIS_REST_URL.trim() 
+    : null;
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN 
+    ? process.env.UPSTASH_REDIS_REST_TOKEN.trim() 
+    : null;
+  const resendKey = process.env.RESEND_API_KEY 
+    ? process.env.RESEND_API_KEY.trim() 
+    : null;
+
+  // Validate Redis credentials
+  if (!redisUrl || !redisToken) {
+    throw new Error('Missing Redis credentials. Please check environment variables.');
+  }
+
+  if (redisUrl.includes(' ') || redisUrl.includes('\n') || redisUrl.includes('\r')) {
+    throw new Error('Redis URL contains invalid whitespace characters. Please check your environment variable.');
+  }
+
+  if (redisToken.includes(' ') || redisToken.includes('\n') || redisToken.includes('\r')) {
+    throw new Error('Redis token contains invalid whitespace characters. Please check your environment variable.');
+  }
+
+  if (!redisUrl.startsWith('https://')) {
+    throw new Error('Invalid Redis URL format. Must start with https://');
+  }
+
+  try {
+    redis = new Redis({
+      url: redisUrl,
+      token: redisToken,
+    });
+  } catch (error) {
+    console.error('Redis initialization error:', error);
+    throw new Error('Failed to initialize Redis connection: ' + error.message);
   }
   
-  if (!resend) {
-    try {
-      resend = new Resend(process.env.RESEND_API_KEY);
-    } catch (error) {
-      console.error('Resend initialization error:', error);
-      throw new Error('Failed to initialize email service');
-    }
+  try {
+    resend = new Resend(resendKey);
+  } catch (error) {
+    console.error('Resend initialization error:', error);
+    throw new Error('Failed to initialize email service: ' + error.message);
   }
 }
 
@@ -179,7 +208,7 @@ One entry per person. Good luck!
     console.error('Submission handler error:', error);
     res.status(500).json({
       success: false,
-      message: 'An unexpected error occurred. Please try again later.'
+      message: 'An unexpected error occurred: ' + error.message
     });
   }
 };
