@@ -1,17 +1,34 @@
 const { Redis } = require('@upstash/redis');
 const { Resend } = require('resend');
 
-// Initialize Redis client
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+let redis, resend;
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize clients only when needed to avoid cold start issues
+function initializeClients() {
+  if (!redis) {
+    try {
+      redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      });
+    } catch (error) {
+      console.error('Redis initialization error:', error);
+      throw new Error('Failed to initialize Redis');
+    }
+  }
+  
+  if (!resend) {
+    try {
+      resend = new Resend(process.env.RESEND_API_KEY);
+    } catch (error) {
+      console.error('Resend initialization error:', error);
+      throw new Error('Failed to initialize Resend');
+    }
+  }
+}
 
 // Video URLs
-const WINNING_VIDEO = 'https://www.youtube.com/watch?v=7Gw57AxsgMY'; // Perfect 8K Red Spider Lily blooming timelapse
+const WINNING_VIDEO = 'https://www.youtube.com/watch?v=7Gw57AxsgMY';
 const SAFE_VIDEOS = [
   'https://www.youtube.com/watch?v=RzVvThhjAKw',
   'https://www.youtube.com/watch?v=AKeUssuu3Is',
@@ -30,7 +47,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+  res.setHeader('Access-Control-Max-Age', '86400');
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
@@ -47,6 +64,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Initialize clients
+    initializeClients();
+    
     const { email } = req.body;
 
     // Validate email
@@ -58,7 +78,17 @@ export default async function handler(req, res) {
     }
 
     // Check if email already participated
-    const existingEntry = await redis.get(`participant:${email}`);
+    let existingEntry;
+    try {
+      existingEntry = await redis.get(`participant:${email}`);
+    } catch (redisError) {
+      console.error('Redis get error:', redisError);
+      return res.status(500).json({
+        success: false,
+        message: 'Database error. Please try again.'
+      });
+    }
+    
     if (existingEntry) {
       return res.status(400).json({
         success: false,
@@ -75,27 +105,41 @@ export default async function handler(req, res) {
       : SAFE_VIDEOS[Math.floor(Math.random() * SAFE_VIDEOS.length)];
 
     // Store participant data
-    await redis.set(
-      `participant:${email}`,
-      JSON.stringify({
-        email,
-        isWinner,
-        videoLink,
-        timestamp: new Date().toISOString()
-      }),
-      { ex: 60 * 60 * 24 * 30 } // Expire after 30 days
-    );
+    try {
+      await redis.set(
+        `participant:${email}`,
+        JSON.stringify({
+          email,
+          isWinner,
+          videoLink,
+          timestamp: new Date().toISOString()
+        }),
+        { ex: 60 * 60 * 24 * 30 } // Expire after 30 days
+      );
+    } catch (redisError) {
+      console.error('Redis set error:', redisError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to save your entry. Please try again.'
+      });
+    }
 
     // Update stats
-    const today = new Date().toISOString().split('T')[0];
-    await redis.incr('total_attempts');
-    await redis.incr(`attempts_${today}`);
-    if (isWinner) {
-      await redis.incr('total_winners');
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      await redis.incr('total_attempts');
+      await redis.incr(`attempts_${today}`);
+      if (isWinner) {
+        await redis.incr('total_winners');
+      }
+    } catch (statsError) {
+      console.error('Stats update error:', statsError);
+      // Don't fail the request if stats update fails
     }
 
     // Send email
-    const emailContent = `
+    try {
+      const emailContent = `
 Thank you for participating! Here is your mystery video:
 
 ${videoLink}
@@ -107,12 +151,16 @@ ${isWinner
 One entry per person. Good luck!
 `;
 
-    await resend.emails.send({
-      from: 'WhoWinningLilly <onboarding@resend.dev>',
-      to: email,
-      subject: 'Your WhoWinningLilly Fate Revealed',
-      text: emailContent,
-    });
+      await resend.emails.send({
+        from: 'WhoWinningLilly <onboarding@resend.dev>',
+        to: email,
+        subject: 'Your WhoWinningLilly Fate Revealed',
+        text: emailContent,
+      });
+    } catch (emailError) {
+      console.error('Email sending error:', emailError);
+      // Don't fail the request if email fails - still show success to user
+    }
 
     // Return success response
     return res.status(200).json({
@@ -122,10 +170,10 @@ One entry per person. Good luck!
     });
 
   } catch (error) {
-    console.error('Submission error:', error);
+    console.error('Submission handler error:', error);
     return res.status(500).json({
       success: false,
-      message: 'An error occurred while processing your submission. Please try again.'
+      message: 'An unexpected error occurred. Please try again later.'
     });
   }
 }
