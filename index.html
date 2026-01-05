@@ -190,6 +190,7 @@
             text-decoration: none;
             display: inline-block;
             margin-right: 15px;
+            margin-top: 10px;
         }
 
         .hero-btn::before {
@@ -596,6 +597,9 @@
             
             .hero-btn {
                 margin: 10px 5px;
+                display: block;
+                width: 80%;
+                margin: 10px auto;
             }
         }
 
@@ -666,6 +670,19 @@
         .instagram-link:hover {
             text-decoration: underline;
         }
+        
+        /* Form enhancements */
+        .form-success {
+            text-align: center;
+            padding: 30px;
+            color: var(--gold);
+        }
+        
+        .form-success i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -734,7 +751,7 @@
                 <p>Enter your email for a chance to win exclusive prizes</p>
             </div>
             <div class="form-container glass-card">
-                <form id="participation-form" action="/api/submit" method="POST">
+                <form id="participation-form">
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <input type="email" id="email" name="email" class="form-control" placeholder="your.email@example.com" required>
@@ -750,6 +767,11 @@
                         <p>Processing your entry...</p>
                     </div>
                 </form>
+                <div id="form-success" class="form-success" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Entry Submitted!</h3>
+                    <p>Check your email for your mystery video.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -826,13 +848,13 @@
                     <div class="footer-logo">WhoWinningLilly</div>
                     <p>Premium mystery contest with exclusive prizes for lucky winners.</p>
                     <div class="social-links">
-                        <a href="https://instagram.com/WhoWinningLilly" target="_blank">
+                        <a href="https://instagram.com/WhoWinningLilly" target="_blank" title="Instagram">
                             <i class="fab fa-instagram"></i>
                         </a>
-                        <a href="https://twitter.com/WhoWinningLilly" target="_blank">
+                        <a href="https://twitter.com/WhoWinningLilly" target="_blank" title="Twitter">
                             <i class="fab fa-twitter"></i>
                         </a>
-                        <a href="https://tiktok.com/@WhoWinningLilly" target="_blank">
+                        <a href="https://tiktok.com/@WhoWinningLilly" target="_blank" title="TikTok">
                             <i class="fab fa-tiktok"></i>
                         </a>
                     </div>
@@ -877,6 +899,7 @@
             const email = document.getElementById('email').value;
             const loading = document.getElementById('loading');
             const submitBtn = document.querySelector('.submit-btn');
+            const formSuccess = document.getElementById('form-success');
             
             // Validate email format
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -890,11 +913,12 @@
             loading.style.display = 'block';
             
             // Submit form via fetch
-            const formData = new FormData(this);
-            
             fetch('/api/submit', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email })
             })
             .then(response => response.json())
             .then(data => {
@@ -903,16 +927,13 @@
                 submitBtn.disabled = false;
                 
                 if (data.success) {
-                    // Show success notification
+                    // Show success message
+                    document.getElementById('participation-form').style.display = 'none';
+                    formSuccess.style.display = 'block';
+                    
                     showNotification(data.message);
-                    
-                    // Reset form
-                    document.getElementById('participation-form').reset();
-                    
-                    // Update stats
                     updateStats();
                 } else {
-                    // Show error
                     showNotification(data.message, 'error');
                 }
             })
@@ -921,7 +942,6 @@
                 loading.style.display = 'none';
                 submitBtn.disabled = false;
                 
-                // Show error
                 showNotification('An error occurred. Please try again.', 'error');
                 console.error('Error:', error);
             });
@@ -948,19 +968,21 @@
         
         // Update stats with animation
         function updateStats() {
-            // In a real implementation, this would fetch from the API
-            // For now, we'll simulate updates
-            const attemptsElement = document.getElementById('total-attempts');
-            const current = parseInt(attemptsElement.textContent.replace(/,/g, ''));
-            const newValue = current + 1;
-            
-            // Animate the counter
-            animateValue(attemptsElement, current, newValue, 1000);
-            
-            // Update today's attempts
-            const todayElement = document.getElementById('attempts-today');
-            const todayCurrent = parseInt(todayElement.textContent.replace(/,/g, ''));
-            animateValue(todayElement, todayCurrent, todayCurrent + 1, 1000);
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    animateValue(document.getElementById('total-attempts'), 
+                                parseInt(document.getElementById('total-attempts').textContent.replace(/,/g, '')), 
+                                data.totalAttempts, 1000);
+                    animateValue(document.getElementById('attempts-today'), 
+                                parseInt(document.getElementById('attempts-today').textContent.replace(/,/g, '')), 
+                                data.attemptsToday, 1000);
+                    animateValue(document.getElementById('winners'), 
+                                parseInt(document.getElementById('winners').textContent), 
+                                data.winners, 1000);
+                    document.getElementById('prizes-remaining').textContent = data.prizesRemaining;
+                })
+                .catch(error => console.error('Error fetching stats:', error));
         }
         
         // Animate counter values
@@ -999,15 +1021,10 @@
             });
             
             // Fetch initial stats
-            fetch('/api/stats')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('total-attempts').textContent = data.totalAttempts.toLocaleString();
-                    document.getElementById('attempts-today').textContent = data.attemptsToday.toLocaleString();
-                    document.getElementById('winners').textContent = data.winners;
-                    document.getElementById('prizes-remaining').textContent = data.prizesRemaining;
-                })
-                .catch(error => console.error('Error fetching stats:', error));
+            updateStats();
+            
+            // Update stats every 30 seconds
+            setInterval(updateStats, 30000);
         });
     </script>
 </body>
