@@ -913,14 +913,19 @@
             loading.style.display = 'block';
             
             // Submit form via fetch
-            fetch('/api/submit.js', {
+            fetch('/api/submit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ email })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 // Hide loading
                 loading.style.display = 'none';
@@ -942,8 +947,8 @@
                 loading.style.display = 'none';
                 submitBtn.disabled = false;
                 
-                showNotification('An error occurred. Please try again.', 'error');
-                console.error('Error:', error);
+                console.error('Full error details:', error);
+                showNotification('An error occurred: ' + (error.message || 'Please try again.'), 'error');
             });
         });
         
@@ -969,7 +974,12 @@
         // Update stats with animation
         function updateStats() {
             fetch('/api/stats')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     animateValue(document.getElementById('total-attempts'), 
                                 parseInt(document.getElementById('total-attempts').textContent.replace(/,/g, '')), 
@@ -982,7 +992,9 @@
                                 data.winners, 1000);
                     document.getElementById('prizes-remaining').textContent = data.prizesRemaining;
                 })
-                .catch(error => console.error('Error fetching stats:', error));
+                .catch(error => {
+                    console.error('Error fetching stats:', error);
+                });
         }
         
         // Animate counter values
