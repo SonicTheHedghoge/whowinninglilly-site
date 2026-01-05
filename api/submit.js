@@ -11,7 +11,7 @@ const redis = new Redis({
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Video URLs
-const WINNING_VIDEO = 'https://www.youtube.com/watch?v=7Gw57AxsgMY';
+const WINNING_VIDEO = 'https://www.youtube.com/watch?v=7Gw57AxsgMY'; // Perfect 8K Red Spider Lily blooming timelapse
 const SAFE_VIDEOS = [
   'https://www.youtube.com/watch?v=RzVvThhjAKw',
   'https://www.youtube.com/watch?v=AKeUssuu3Is',
@@ -26,14 +26,16 @@ const SAFE_VIDEOS = [
 ];
 
 export default async function handler(req, res) {
-  // Enable CORS
+  // Enable CORS for all origins
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
 
   // Only allow POST requests
@@ -44,17 +46,17 @@ export default async function handler(req, res) {
     });
   }
 
-  const { email } = req.body;
-
-  // Validate email
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Please provide a valid email address'
-    });
-  }
-
   try {
+    const { email } = req.body;
+
+    // Validate email
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+
     // Check if email already participated
     const existingEntry = await redis.get(`participant:${email}`);
     if (existingEntry) {
